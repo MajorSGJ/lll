@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="phone-container">
+        <div id="phone" class="phone">
+            <div id="status-bar" class="status-bar">
+                <span id="status-signal"></span>
+                <span id="clock"></span>
+                <span id="date-display"></span>
+                <span id="status-battery"></span>
+            </div>
+
+            <div id="app-container">
+                <div id="home-screen" class="app-screen active">
+                    <div class="header">
+                        <h2>Ekran główny</h2>
+                    </div>
+                    <div class="home-grid">
+                        <button class="app-icon" onclick="showScreen('contacts'); initContactsScreen()">📒 Kontakty</button>
+                        <button class="app-icon" onclick="showScreen('messages'); initMessagesScreen()">💬 SMS</button>
+                        <button class="app-icon" onclick="showScreen('calls'); initCallsScreen()">📞 Połączenia</button>
+                        <button id="home-bank-app" class="app-icon" onclick="showScreen('banking'); initBankingScreen()">🏦 Bank</button>
+                        <button class="app-icon" onclick="showScreen('twitter'); initTwitterScreen()">🐦 Twatter</button>
+                        <button class="app-icon" onclick="showScreen('camera'); initCameraScreen()">📸 Aparat</button>
+                        <button class="app-icon" onclick="showScreen('settings'); initSettingsScreen()">⚙️ Ustawienia</button>
+                        <button class="app-icon">Mapy</button>
+                    </div>
+                    <div class="home-dock">
+                        <button class="app-icon" onclick="showScreen('contacts'); initContactsScreen()">📒</button>
+                        <button class="app-icon" onclick="showScreen('messages'); initMessagesScreen()">💬</button>
+                        <button class="app-icon" onclick="showScreen('calls'); initCallsScreen()">📞</button>
+                        <button id="home-bank-dock" class="app-icon" onclick="showScreen('banking'); initBankingScreen()">🏦</button>
+                    </div>
+                </div>
+
+                <div id="contacts-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Kontakty</h2>
+                        <button id="add-contact-btn" onclick="openModal()">➕ Dodaj</button>
+                    </div>
+
+                    <input id="contacts-search" type="text" placeholder="Szukaj kontaktu..." />
+                    <div id="contacts-list"></div>
+
+                    <div id="contact-modal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <h3 id="contact-modal-title">Dodaj kontakt</h3>
+                            <form id="contact-form">
+                                <input id="contact-name" type="text" placeholder="Imię i nazwisko" />
+                                <input id="contact-number" type="text" placeholder="Numer telefonu" />
+                                <input id="contact-avatar" type="text" placeholder="Emoji awatara (np. 😊)" />
+                                <div class="modal-buttons">
+                                    <button type="submit">Zapisz</button>
+                                    <button type="button" onclick="closeModal()">Anuluj</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="messages-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Wiadomości</h2>
+                        <button id="new-message-btn" onclick="openNewMessageModal()">+ Nowa</button>
+                    </div>
+                    <div id="conversations-list"></div>
+                </div>
+
+                <div id="chat-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('messages'); fetchNUI('closeChat',{}); initMessagesScreen()">←</button>
+                        <div class="contact-info">
+                            <div id="chat-header-name"></div>
+                            <div id="chat-header-number"></div>
+                        </div>
+                    </div>
+                    <div id="messages-list" class="messages-container"></div>
+                    <div class="input-area">
+                        <input id="message-input" placeholder="Napisz wiadomość..." />
+                        <button id="send-btn">➤</button>
+                    </div>
+                </div>
+
+                <div id="new-message-modal" class="modal" style="display:none">
+                    <div class="modal-content">
+                        <h3>Nowa wiadomość</h3>
+                        <form id="new-message-form">
+                            <input id="new-message-number" placeholder="Numer telefonu" />
+                            <div class="modal-buttons">
+                                <button type="submit">Otwórz</button>
+                                <button type="button" onclick="closeNewMessageModal()">Anuluj</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="calls-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Połączenia</h2>
+                    </div>
+                    <div id="calls-history-list"></div>
+                </div>
+
+                <div id="banking-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Bank</h2>
+                    </div>
+
+                    <div class="banking-content">
+                        <div id="banking-disabled-notice" class="banking-disabled" style="display:none;">Aplikacja bankowa jest wyłączona.</div>
+
+                        <div class="bank-balance-card">
+                            <div class="bank-balance-label">Saldo</div>
+                            <div id="bank-balance-amount" class="bank-balance-amount">$0</div>
+                        </div>
+
+                        <div class="bank-actions">
+                            <button class="bank-action-btn" onclick="openBankTransferModal()">Przelew</button>
+                            <button class="bank-action-btn" onclick="handleBankAtmAction('deposit')">Wpłata (ATM)</button>
+                            <button class="bank-action-btn" onclick="handleBankAtmAction('withdraw')">Wypłata (ATM)</button>
+                        </div>
+
+                        <div class="bank-transactions-header">Ostatnie transakcje</div>
+                        <div id="bank-transactions-list" class="bank-transactions-list"></div>
+                    </div>
+                </div>
+
+                <div id="bank-transfer-modal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <h3>Nowy przelew</h3>
+                        <form id="bank-transfer-form">
+                            <input id="bank-transfer-target" placeholder="Numer telefonu lub citizenid" />
+                            <input id="bank-transfer-amount" type="number" min="1" placeholder="Kwota" />
+                            <input id="bank-transfer-description" placeholder="Opis (opcjonalnie)" />
+                            <div class="modal-buttons">
+                                <button type="submit">Wyślij</button>
+                                <button type="button" onclick="closeBankTransferModal()">Anuluj</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="twitter-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2 id="twitter-title">Twatter</h2>
+                        <button class="bank-action-btn" onclick="refreshTwitterFeed()">Odśwież</button>
+                    </div>
+
+                    <div class="twitter-composer">
+                        <div id="twitter-username-display" class="twitter-username"></div>
+                        <form id="twitter-post-form">
+                            <textarea id="twitter-post-input" maxlength="280" placeholder="Co słychać?"></textarea>
+                            <div class="twitter-composer-footer">
+                                <span id="twitter-char-count">0/280</span>
+                                <button type="submit" class="bank-action-btn">Tweet</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="twitter-feed-list" class="twitter-feed-list"></div>
+                </div>
+
+                <div id="camera-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Aparat</h2>
+                        <button class="bank-action-btn" onclick="takeSelfieFromUI()">Selfie</button>
+                    </div>
+
+                    <div class="camera-content">
+                        <button class="camera-capture-btn" onclick="takeSelfieFromUI()">📷 Zrób zdjęcie</button>
+                        <div id="camera-gallery" class="camera-gallery"></div>
+                    </div>
+                </div>
+
+                <div id="settings-screen" class="app-screen">
+                    <div class="header">
+                        <button class="back-btn" onclick="showScreen('home')">←</button>
+                        <h2>Ustawienia</h2>
+                    </div>
+
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <div class="settings-title">Tapeta</div>
+                            <div class="settings-row">
+                                <button class="bank-action-btn" onclick="setWallpaper('default')">Domyślna</button>
+                                <button class="bank-action-btn" onclick="setWallpaper('blue')">Niebieska</button>
+                                <button class="bank-action-btn" onclick="setWallpaper('red')">Czerwona</button>
+                                <button class="bank-action-btn" onclick="setWallpaper('green')">Zielona</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <div class="settings-title">Twatter</div>
+                            <form id="settings-twitter-form" class="settings-form">
+                                <input id="settings-twitter-username" placeholder="Nowa nazwa użytkownika" />
+                                <button type="submit" class="bank-action-btn">Zmień</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-section">
+                            <div class="settings-title">Powiadomienia</div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" id="settings-notif-sound" />
+                                <span>Dźwięk powiadomień</span>
+                            </label>
+                        </div>
+
+                        <div class="settings-section">
+                            <div class="settings-title">Telefon</div>
+                            <div id="settings-phone-info" class="settings-info"></div>
+                        </div>
+
+                        <button class="call-btn decline" onclick="fetchNUI('closePhone', {})">Wyloguj z telefonu</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="push-notification" style="display:none">
+                <div id="push-notif-icon">🔔</div>
+                <div id="push-notif-title"></div>
+                <div id="push-notif-body"></div>
+            </div>
+
+            <audio id="notif-sound" src="sounds/notification.ogg" preload="auto"></audio>
+
+            <div id="incoming-call-overlay" class="call-overlay">
+                <div class="call-card">
+                    <div class="call-label">Połączenie przychodzące</div>
+                    <div id="incoming-caller-name" class="call-name"></div>
+                    <div id="incoming-caller-number" class="call-number"></div>
+                    <div class="call-actions">
+                        <button class="call-btn decline" onclick="declineIncomingCall()">Odrzuć</button>
+                        <button class="call-btn accept" onclick="acceptIncomingCall()">Odbierz</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="active-call-overlay" class="call-overlay">
+                <div class="call-card">
+                    <div class="call-label">Rozmowa</div>
+                    <div id="active-call-name" class="call-name"></div>
+                    <div id="active-call-number" class="call-number"></div>
+                    <div id="active-call-timer" class="call-timer">00:00</div>
+                    <div class="call-actions single">
+                        <button class="call-btn decline" onclick="endActiveCall()">Rozłącz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/calls.js"></script>
+    <script src="js/apps/banking.js"></script>
+    <script src="js/apps/twitter.js"></script>
+    <script src="js/apps/settings.js"></script>
+</body>
+</html>
