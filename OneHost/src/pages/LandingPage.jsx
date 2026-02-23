@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useSEO } from '../hooks/useSEO';
 
 /* ── Data ──────────────────────────────────────────────────────────── */
 const PRODUCTS = [
@@ -40,30 +41,30 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    maxEmployees: 40,
+    maxEmployees: 25,
     maxUsers: 3,
     maxProfiles: 1,
-    features: ['Do 40 rekordów na aplikację (pracownicy/sprzęt)', 'Do 3 przypisań użytkowników na profil', '1 profil na aplikację', 'Email wsparcie', '7 dni free trial'],
+    features: ['Do 25 rekordów na aplikację (pracownicy/sprzęt)', 'Do 3 przypisań użytkowników na profil', '1 profil na aplikację', 'Email wsparcie', '7 dni free trial'],
     popular: false,
     trial: true,
   },
   {
     key: 'business',
     name: 'Business',
-    maxEmployees: 200,
-    maxUsers: 15,
-    maxProfiles: 5,
-    features: ['Do 200 rekordów na aplikację (pracownicy/sprzęt)', 'Do 15 przypisań użytkowników na profil', '5 profili na aplikację', 'Priorytetowe wsparcie'],
+    maxEmployees: 100,
+    maxUsers: 10,
+    maxProfiles: 3,
+    features: ['Do 100 rekordów na aplikację (pracownicy/sprzęt)', 'Do 10 przypisań użytkowników na profil', '3 profile na aplikację', 'Priorytetowe wsparcie'],
     popular: true,
     trial: false,
   },
   {
     key: 'enterprise',
     name: 'Enterprise',
-    maxEmployees: 1000,
+    maxEmployees: 500,
     maxUsers: 0,
-    maxProfiles: 20,
-    features: ['Do 1000 rekordów na aplikację (pracownicy/sprzęt)', 'Bez limitu przypisań użytkowników na profil', '20 profili na aplikację', 'Dedykowane wsparcie', 'Własne integracje'],
+    maxProfiles: 10,
+    features: ['Do 500 rekordów na aplikację (pracownicy/sprzęt)', 'Bez limitu przypisań użytkowników na profil', '10 profili na aplikację', 'Dedykowane wsparcie', 'Własne integracje'],
     popular: false,
     trial: false,
   },
@@ -71,7 +72,7 @@ const PLANS = [
 
 const FAQ_ITEMS = [
   { q: 'Czym jest OneHost?', a: 'OneHost to platforma łącząca trzy narzędzia dla firm: ShiftPlanner (grafiki pracy), Equipment Manager (przeglądy sprzętu) i CertTrack (certyfikaty pracowników). Wszystkie płatności i zarządzanie kontem odbywają się w jednym panelu.' },
-  { q: 'Czy mogę wypróbować za darmo?', a: 'Tak — plan Starter oferuje 7-dniowy darmowy okres próbny. Wymagane jest podanie danych karty płatniczej. Jeśli nie anulujesz przed końcem trialu, subskrypcja zostanie automatycznie aktywowana.' },
+  { q: 'Czy mogę wypróbować za darmo?', a: 'Tak — plan Starter oferuje 7-dniowy darmowy okres próbny bez wymaganej karty płatniczej. Po zakończeniu trialu możesz samodzielnie uruchomić płatną subskrypcję.' },
   { q: 'Ile kosztuje OneHost?', a: 'Każdy produkt ma indywidualną cenę zależną od planu. Na planie Starter: ShiftPlanner — 89 PLN/mies., CertTrack — 79 PLN/mies., Equipment Manager — 59 PLN/mies. Możesz kupić 1, 2 lub 3 produkty. Pakiet 3 produktów daje rabat 20%, a płatność roczna dodatkowe ~20% rabatu.' },
   { q: 'Czy dane mojej firmy są bezpieczne?', a: 'Tak. Każda firma ma całkowicie oddzielone dane (architektura multi-tenant). Stosujemy szyfrowane połączenia, uwierzytelnianie JWT i rate limiting.' },
   { q: 'Jak działa system wielu użytkowników?', a: 'Admin firmy może zapraszać kolejnych użytkowników (np. kierowników, managerów) — wszyscy współdzielą dane firmy. Każdy użytkownik ma własne konto i hasło.' },
@@ -88,6 +89,13 @@ const CheckIcon = () => (
 );
 
 export default function LandingPage() {
+  useSEO({
+    title: 'OneHost – Grafiki pracy, przeglądy sprzętu i certyfikaty | Platforma dla firm',
+    description: 'OneHost to kompleksowa platforma SaaS dla polskich firm: ShiftPlanner (grafiki zmian), Equipment Manager (przeglądy sprzętu), CertTrack (certyfikaty pracowników). 7 dni za darmo!',
+    keywords: 'grafiki pracy, planowanie zmian, przeglądy sprzętu, certyfikaty pracowników, zarządzanie firmą, SaaS dla firm, ShiftPlanner, Equipment Manager, CertTrack, OneHost, oprogramowanie dla firm, grafik zmianowy, platforma HR',
+    ogUrl: 'https://sklep.onehost.site/'
+  });
+
   const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [selectedProducts, setSelectedProducts] = useState(['shiftplanner', 'equipment', 'certtrack']);
@@ -247,11 +255,11 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Dlaczego OneHost?</h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Narzędzia stworzone z myślą o polskich firmach produkcyjnych i usługowych.</p>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Narzędzia stworzone z myślą o użytkownikach indywidualnych i polskich firmach.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { icon: '🏢', title: 'Izolacja danych', desc: 'Każda firma ma w 100% oddzielone dane. Żadna inna firma nie ma dostępu do Twoich informacji.' },
+                { icon: '🏢', title: 'Izolacja danych', desc: 'Każde konto ma w 100% oddzielone dane. Żadne inne konto nie ma dostępu do Twoich informacji.' },
                 { icon: '👥', title: 'Wielu użytkowników', desc: 'Zaproś kierowników i pracowników z różnymi rolami. Wszyscy współdzielą dane firmy.' },
                 { icon: '📊', title: 'Wiele profili danych', desc: 'Różne oddziały, różne grafiki — każdy kierownik może mieć własny profil danych.' },
                 { icon: '🔒', title: 'Bezpieczeństwo', desc: 'Szyfrowane połączenia, JWT auth, rate limiting, zabezpieczone API.' },

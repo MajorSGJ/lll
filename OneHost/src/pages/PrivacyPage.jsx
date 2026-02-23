@@ -1,7 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 
 export default function PrivacyPage() {
+  useSEO({
+    title: 'Polityka Prywatności | OneHost',
+    description: 'Polityka prywatności platformy OneHost. Dowiedz się, jak chronimy Twoje dane osobowe i informacje o Twojej firmie.',
+    ogUrl: 'https://sklep.onehost.site/privacy'
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">

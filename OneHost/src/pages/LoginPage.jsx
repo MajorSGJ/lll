@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useSEO } from '../hooks/useSEO';
 
 export default function LoginPage() {
+  useSEO({
+    title: 'Logowanie | OneHost',
+    description: 'Zaloguj się do platformy OneHost, aby zarządzać grafikami pracy, sprzętem i certyfikatami pracowników.',
+    ogUrl: 'https://sklep.onehost.site/login',
+    robots: 'noindex, nofollow'
+  });
+
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

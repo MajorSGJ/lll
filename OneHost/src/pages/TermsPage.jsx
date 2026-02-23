@@ -1,7 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 
 export default function TermsPage() {
+  useSEO({
+    title: 'Regulamin korzystania z platformy OneHost',
+    description: 'Aktualny regulamin korzystania z platformy OneHost: zasady subskrypcji, trial, płatności, limity planów i przetwarzanie danych.',
+    ogUrl: 'https://sklep.onehost.site/terms'
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
@@ -28,15 +35,14 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-slate-800 mb-3">§1. Definicje</h2>
             <ol className="list-decimal pl-6 space-y-2">
               <li><strong>Usługodawca</strong> — OneHost, platforma SaaS dostępna pod adresem <strong>sklep.onehost.site</strong>, kontakt: <a href="mailto:Admin@onehost.site" className="text-teal-600 underline">Admin@onehost.site</a>.</li>
-              <li><strong>Usługobiorca / Użytkownik</strong> — osoba fizyczna prowadząca działalność gospodarczą, osoba prawna lub jednostka organizacyjna, która zawarła umowę o świadczenie usług drogą elektroniczną z Usługodawcą poprzez rejestrację na Platformie.</li>
+              <li><strong>Usługobiorca / Użytkownik</strong> — osoba fizyczna, osoba fizyczna prowadząca działalność gospodarczą, osoba prawna lub jednostka organizacyjna, która zawarła umowę o świadczenie usług drogą elektroniczną z Usługodawcą poprzez rejestrację na Platformie.</li>
               <li><strong>Platforma</strong> — serwis internetowy OneHost wraz z podstronami i aplikacjami: ShiftPlanner, Equipment Manager, CertTrack.</li>
               <li><strong>Konto</strong> — indywidualne konto Użytkownika chronione adresem e-mail (loginem) i hasłem, umożliwiające korzystanie z Platformy.</li>
-              <li><strong>Konto Firmowe (Tenant)</strong> — wspólna przestrzeń danych firmy, do której mogą być zaproszeni dodatkowi Użytkownicy.</li>
-              <li><strong>Trial (Okres Próbny)</strong> — bezpłatny 7-dniowy okres próbny dostępny wyłącznie w planie Starter, wymagający podania danych karty płatniczej w systemie Stripe.</li>
+              <li><strong>Konto Organizacyjne (Tenant)</strong> — wspólna przestrzeń danych Użytkownika lub firmy, do której mogą być zaproszeni dodatkowi Użytkownicy.</li>
+              <li><strong>Trial (Okres Próbny)</strong> — bezpłatny 7-dniowy okres próbny dostępny wyłącznie w planie Starter, bez obowiązku podania danych karty płatniczej w systemie Stripe.</li>
               <li><strong>Plan</strong> — pakiet funkcjonalności (Starter, Business, Enterprise) wykupywany w cyklu miesięcznym lub rocznym.</li>
               <li><strong>Profil Danych</strong> — oddzielna baza danych / zestaw danych w ramach jednego Konta Firmowego, przypisana do konkretnej aplikacji. Limit profili jest liczony osobno dla każdej aplikacji.</li>
               <li><strong>Produkt / Aplikacja</strong> — jedna z trzech aplikacji: ShiftPlanner, Equipment Manager, CertTrack.</li>
-              <li><strong>Subskrypcja</strong> — okres świadczenia usług na podstawie wykupionego Planu, odnawiany automatycznie, jeśli nie zostanie anulowany przez Użytkownika.</li>
             </ol>
           </section>
 
@@ -45,9 +51,9 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-slate-800 mb-3">§2. Postanowienia ogólne</h2>
             <ol className="list-decimal pl-6 space-y-2">
               <li>Niniejszy Regulamin określa zasady korzystania z Platformy OneHost i stanowi umowę pomiędzy Usługodawcą a Usługobiorcą.</li>
-              <li>Korzystanie z Platformy jest równoznaczne z akceptacją niniejszego Regulaminu oraz <Link to="/privacy" className="text-teal-600 underline">Polityki Prywatności</Link>, która stanowi integralną część Regulaminu.</li>
+              <li>Korzystanie z Platformy jest równoznaczne z akceptacją niniejszego Regulaminu oraz <Link to="/privacy" className="text-teal-600 underline">Polityki Prywatności</Link>.</li>
               <li>Usługodawca świadczy usługi drogą elektroniczną 24 godziny na dobę, 7 dni w tygodniu, z zastrzeżeniem przerw technicznych, serwisowych i modernizacyjnych.</li>
-              <li>Platforma jest przeznaczona wyłącznie dla podmiotów prowadzących działalność gospodarczą (B2B). Użytkownik oświadcza, że korzysta z Platformy w związku z prowadzoną działalnością zawodową lub gospodarczą.</li>
+              <li>Platforma jest przeznaczona dla Użytkowników indywidualnych oraz podmiotów prowadzących działalność gospodarczą.</li>
               <li>Usługodawca zastrzega sobie prawo do wprowadzania zmian w funkcjonalnościach Platformy, w tym dodawania nowych funkcji oraz modyfikacji istniejących, bez uprzedniego powiadomienia, o ile nie wpływa to istotnie na zakres świadczonych usług.</li>
               <li>Wymagania techniczne: przeglądarka internetowa z obsługą JavaScript (Chrome, Firefox, Edge, Safari w aktualnych wersjach), połączenie z Internetem.</li>
             </ol>
@@ -57,7 +63,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-800 mb-3">§3. Rejestracja i Konto</h2>
             <ol className="list-decimal pl-6 space-y-2">
-              <li>Rejestracja wymaga podania: nazwy firmy, imienia i nazwiska osoby rejestrującej, adresu e-mail oraz hasła (minimum 6 znaków).</li>
+              <li>Rejestracja wymaga podania: adresu e-mail oraz hasła (minimum 6 znaków). Użytkownik może dodatkowo podać imię i nazwisko oraz nazwę firmy.</li>
               <li>Użytkownik zobowiązuje się do podania prawdziwych i aktualnych danych. Usługodawca nie ponosi odpowiedzialności za skutki podania nieprawdziwych danych.</li>
               <li>Po rejestracji na podany adres e-mail wysyłany jest link weryfikacyjny. Weryfikacja adresu e-mail jest zalecaną częścią procesu rejestracji.</li>
               <li>Właściciel Konta Firmowego (administrator) może zapraszać dodatkowych Użytkowników. Zaproszeni Użytkownicy logują się własnymi danymi, ale współdzielą dane firmowe w ramach jednego Konta Firmowego.</li>
@@ -71,8 +77,8 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-slate-800 mb-3">§4. Okres Próbny (Trial)</h2>
             <ol className="list-decimal pl-6 space-y-2">
               <li>Bezpłatny okres próbny trwa <strong>7 dni kalendarzowych</strong> i jest dostępny wyłącznie przy pierwszej rejestracji w planie Starter.</li>
-              <li>Rozpoczęcie okresu próbnego wymaga podania danych karty płatniczej w systemie Stripe. Dane karty są przetwarzane wyłącznie przez Stripe Inc. — Usługodawca nie przechowuje ani nie ma dostępu do pełnych danych karty.</li>
-              <li>Po upływie 7 dni karta zostaje automatycznie obciążona kwotą odpowiadającą wybranemu planowi i wybranym produktom, chyba że Użytkownik anuluje subskrypcję przed upływem okresu próbnego.</li>
+              <li>Rozpoczęcie okresu próbnego nie wymaga podania danych karty płatniczej.</li>
+              <li>Po upływie 7 dni dostęp wygasa, a Użytkownik może uruchomić płatną subskrypcję w panelu rozliczeń Stripe.</li>
               <li>Użytkownik może anulować subskrypcję w dowolnym momencie trwania okresu próbnego bez ponoszenia jakichkolwiek kosztów.</li>
               <li>Okres próbny może być wykorzystany jednokrotnie na jeden adres e-mail / jedno Konto Firmowe.</li>
               <li>W trakcie okresu próbnego Użytkownik ma pełny dostęp do wszystkich funkcjonalności wybranego planu.</li>
@@ -99,7 +105,7 @@ export default function TermsPage() {
               <li>Płatności obsługiwane są przez <strong>Stripe Inc.</strong> Usługodawca nie przechowuje danych kart płatniczych.</li>
               <li>Subskrypcja odnawia się automatycznie na koniec każdego okresu rozliczeniowego (miesiąc lub rok). Anulowanie jest możliwe w panelu rozliczeniowym w Platformie.</li>
               <li>Usługodawca zastrzega sobie prawo do zmiany cen. O zmianach Użytkownicy zostaną poinformowani z co najmniej 30-dniowym wyprzedzeniem drogą e-mail lub poprzez powiadomienie na Platformie. Nowe ceny obowiązują od następnego okresu rozliczeniowego.</li>
-              <li>W przypadku nieudanej płatności Usługodawca podejmie próby ponownego obciążenia karty. W razie niepowodzenia dostęp do Platformy może zostać zawieszony do czasu uregulowania należności.</li>
+              <li>W przypadku nieudanej płatności Usługodawca podejmie próby ponownego obciążenia karty. Jeśli płatność nie powiedzie się, dostęp do Platformy może zostać zawieszony do czasu uregulowania należności.</li>
             </ol>
           </section>
 
@@ -117,7 +123,7 @@ export default function TermsPage() {
               </li>
               <li>Limit profili danych jest naliczany <strong>osobno na każdą aplikację</strong>. Na planie Starter z 1 profilem Użytkownik może mieć po jednym profilu dla ShiftPlanner, Equipment Manager i CertTrack (łącznie 3 profile).</li>
               <li>Po przekroczeniu limitu pracowników, przypisań użytkowników do profilu lub profili, dodawanie kolejnych jest blokowane do czasu zmiany planu na wyższy.</li>
-              <li>Usługodawca zastrzega sobie prawo do modyfikacji limitów w ramach planów, z zachowaniem co najmniej 30-dniowego powiadomienia Użytkowników.</li>
+              <li>Usługodawca zastrzega sobie prawo do modyfikacji limitów w ramach planów, z co najmniej 30-dniowym powiadomieniem.</li>
             </ol>
           </section>
 
@@ -160,7 +166,7 @@ export default function TermsPage() {
                 </ul>
               </li>
               <li>Usługodawca zastrzega sobie prawo do modyfikacji, rozszerzania lub ograniczania funkcjonalności Produktów. Istotne zmiany będą komunikowane Użytkownikom.</li>
-              <li>Powiadomienia push w Equipment Manager wykorzystują Web Notifications API przeglądarki i działają wyłącznie, gdy aplikacja jest otwarta w karcie przeglądarki. Nie są to powiadomienia typu push w rozumieniu mobilnych systemów operacyjnych.</li>
+              <li>Powiadomienia push w Equipment Manager wykorzystują Web Notifications API przeglądarki i działają wyłącznie gdy aplikacja jest otwarta w karcie przeglądarki. Nie są to powiadomienia typu push w rozumieniu mobilnych systemów operacyjnych.</li>
             </ol>
           </section>
 
@@ -214,7 +220,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-slate-800 mb-3">§11. Rozwiązanie umowy i anulowanie subskrypcji</h2>
             <ol className="list-decimal pl-6 space-y-2">
               <li>Użytkownik może anulować subskrypcję w dowolnym momencie za pośrednictwem panelu rozliczeniowego w Platformie lub portalu Stripe.</li>
-              <li>Po anulowaniu subskrypcji dostęp do Platformy trwa do końca opłaconego okresu rozliczeniowego. Po jego upływie Konto zostaje dezaktywowane. Brak zwrotu opłat za rozpoczęty okres.</li>
+              <li>Po anulowaniu subskrypcji dostęp do Platformy trwa do końca opłaconego okresu rozliczeniowego. Po jego upływie Konto zostaje dezaktywowane.</li>
               <li>Usługodawca może rozwiązać umowę ze skutkiem natychmiastowym w przypadku istotnego naruszenia Regulaminu przez Użytkownika, w szczególności:
                 <ul className="list-disc pl-6 mt-1 space-y-1">
                   <li>próby nieautoryzowanego dostępu do danych innych Użytkowników;</li>
@@ -257,18 +263,6 @@ export default function TermsPage() {
               <li>Wszelkie spory wynikające z niniejszego Regulaminu będą rozstrzygane przez sąd właściwy dla siedziby Usługodawcy.</li>
               <li>Jeżeli jakiekolwiek postanowienie Regulaminu okaże się nieważne lub nieskuteczne, nie wpływa to na ważność pozostałych postanowień.</li>
               <li>Regulamin wchodzi w życie z dniem 21 lutego 2026 r.</li>
-            </ol>
-          </section>
-
-          {/* §15 */}
-          <section>
-            <h2 className="text-xl font-bold text-slate-800 mb-3">§15. Powierzenie danych osobowych (DPA)</h2>
-            <ol className="list-decimal pl-6 space-y-2">
-              <li>Użytkownik powierza Usługodawcy dane osobowe niezbędne do świadczenia usług oferowanych w ramach Platformy.</li>
-              <li>Usługodawca przetwarza dane osobowe wyłącznie w zakresie określonym w niniejszym Regulaminie oraz w <Link to="/privacy" className="text-teal-600 underline">Polityce Prywatności</Link>, zgodnie z obowiązującymi przepisami prawa, w tym Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).</li>
-              <li>Usługodawca zobowiązuje się wdrożyć odpowiednie środki techniczne i organizacyjne w celu zapewnienia bezpieczeństwa danych osobowych.</li>
-              <li>Dane Użytkownika nie będą udostępniane osobom trzecim, poza sytuacjami wymaganymi przez prawo lub przez systemy płatności (np. Stripe), zgodnie z <Link to="/privacy" className="text-teal-600 underline">Polityką Prywatności</Link>.</li>
-              <li>Użytkownik ma prawo do żądania kopii, modyfikacji lub usunięcia danych osobowych w każdym czasie, kontaktując się pod adresem <a href="mailto:Admin@onehost.site" className="text-teal-600 underline">Admin@onehost.site</a>.</li>
             </ol>
           </section>
 

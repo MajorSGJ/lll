@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useSEO } from '../hooks/useSEO';
 import { getApiBaseUrl } from '../apiBase';
 
 const API = getApiBaseUrl();
@@ -18,6 +19,12 @@ const APPS = [
 ];
 
 export default function DashboardPage() {
+  useSEO({
+    title: 'Panel główny | OneHost',
+    description: 'Zarządzaj swoimi aplikacjami OneHost: ShiftPlanner, Equipment Manager i CertTrack.',
+    keywords: 'dashboard, panel, onehost'
+  });
+
   const { user, subscription, token, logout, refresh } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -84,13 +91,8 @@ export default function DashboardPage() {
   };
 
   const resendVerification = async () => {
-    const r = await fetch(`${API}/auth/resend-verification`, { method: 'POST', headers });
-    const data = await r.json();
-    if (!r.ok) {
-      alert(data?.error || 'Nie udało się wysłać emaila weryfikacyjnego.');
-      return;
-    }
-    alert(data?.message || 'Email weryfikacyjny wysłany!');
+    await fetch(`${API}/auth/resend-verification`, { method: 'POST', headers });
+    alert('Email weryfikacyjny wysłany!');
   };
 
   const handleInvite = async (e) => {

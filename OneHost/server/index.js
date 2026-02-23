@@ -27,6 +27,24 @@ const REQUIRE_CARD_FOR_TRIAL = process.env.REQUIRE_CARD_FOR_TRIAL === '1';
 const ONEHOST_PUBLIC_URL = process.env.ONEHOST_PUBLIC_URL || 'https://sklep.onehost.site';
 const ONEHOST_VERIFY_BASE_URL = process.env.ONEHOST_VERIFY_BASE_URL || '';
 
+const DEFAULT_PRODUCT_PRICING = {
+  shiftplanner: {
+    starter: { monthly: 89, yearly: 854 },
+    business: { monthly: 249, yearly: 2390 },
+    enterprise: { monthly: 499, yearly: 4790 },
+  },
+  equipment: {
+    starter: { monthly: 59, yearly: 566 },
+    business: { monthly: 169, yearly: 1622 },
+    enterprise: { monthly: 349, yearly: 3350 },
+  },
+  certtrack: {
+    starter: { monthly: 79, yearly: 758 },
+    business: { monthly: 199, yearly: 1910 },
+    enterprise: { monthly: 399, yearly: 3830 },
+  },
+};
+
 let stripe = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 // ── Database ────────────────────────────────────────────
@@ -184,24 +202,24 @@ if (ADMIN_EMAIL && ADMIN_EFFECTIVE_PASSWORD_HASH) {
 const planCount = db.prepare('SELECT COUNT(*) as c FROM plans_config').get().c;
 if (planCount === 0) {
   const ins = db.prepare('INSERT INTO plans_config (key, name, max_employees, max_users, max_profiles, price_pln, price_pln_yearly, sort_order) VALUES (?,?,?,?,?,?,?,?)');
-  ins.run('starter', 'Starter', 40, 3, 1, 99, 990, 1);
-  ins.run('business', 'Business', 200, 15, 5, 249, 2490, 2);
-  ins.run('enterprise', 'Enterprise', 1000, 0, 20, 499, 4990, 3);
+  ins.run('starter', 'Starter', 25, 3, 1, 89, 854, 1);
+  ins.run('business', 'Business', 100, 10, 3, 249, 2390, 2);
+  ins.run('enterprise', 'Enterprise', 500, 0, 10, 499, 4790, 3);
 }
 
 try { db.exec("UPDATE plans_config SET max_users=0 WHERE key='enterprise' AND max_users=50"); } catch {}
-try { db.exec("UPDATE plans_config SET max_employees=40 WHERE key='starter' AND max_employees=25"); } catch {}
-try { db.exec("UPDATE plans_config SET max_employees=200 WHERE key='business' AND max_employees=100"); } catch {}
-try { db.exec("UPDATE plans_config SET max_employees=1000 WHERE key='enterprise' AND max_employees=500"); } catch {}
-try { db.exec("UPDATE plans_config SET max_users=15 WHERE key='business' AND max_users=10"); } catch {}
-try { db.exec("UPDATE plans_config SET max_profiles=5 WHERE key='business' AND max_profiles=3"); } catch {}
-try { db.exec("UPDATE plans_config SET max_profiles=20 WHERE key='enterprise' AND max_profiles=10"); } catch {}
-try { db.exec("UPDATE plans_config SET price_pln=99 WHERE key='starter' AND price_pln=79"); } catch {}
-try { db.exec("UPDATE plans_config SET price_pln_yearly=990 WHERE key='starter' AND price_pln_yearly=758"); } catch {}
+try { db.exec("UPDATE plans_config SET max_employees=25 WHERE key='starter' AND max_employees=40"); } catch {}
+try { db.exec("UPDATE plans_config SET max_employees=100 WHERE key='business' AND max_employees=200"); } catch {}
+try { db.exec("UPDATE plans_config SET max_employees=500 WHERE key='enterprise' AND max_employees=1000"); } catch {}
+try { db.exec("UPDATE plans_config SET max_users=10 WHERE key='business' AND max_users=15"); } catch {}
+try { db.exec("UPDATE plans_config SET max_profiles=3 WHERE key='business' AND max_profiles=5"); } catch {}
+try { db.exec("UPDATE plans_config SET max_profiles=10 WHERE key='enterprise' AND max_profiles=20"); } catch {}
+try { db.exec("UPDATE plans_config SET price_pln=89 WHERE key='starter' AND price_pln=99"); } catch {}
+try { db.exec("UPDATE plans_config SET price_pln_yearly=854 WHERE key='starter' AND price_pln_yearly=990"); } catch {}
 try { db.exec("UPDATE plans_config SET price_pln=249 WHERE key='business' AND price_pln=199"); } catch {}
-try { db.exec("UPDATE plans_config SET price_pln_yearly=2490 WHERE key='business' AND price_pln_yearly=1910"); } catch {}
+try { db.exec("UPDATE plans_config SET price_pln_yearly=2390 WHERE key='business' AND price_pln_yearly=2490"); } catch {}
 try { db.exec("UPDATE plans_config SET price_pln=499 WHERE key='enterprise' AND price_pln=399"); } catch {}
-try { db.exec("UPDATE plans_config SET price_pln_yearly=4990 WHERE key='enterprise' AND price_pln_yearly=3830"); } catch {}
+try { db.exec("UPDATE plans_config SET price_pln_yearly=4790 WHERE key='enterprise' AND price_pln_yearly=4990"); } catch {}
 
 // ── Ensure new columns exist (migrations) ───────────────
 try { db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0'); } catch {}
@@ -254,14 +272,45 @@ function getBundleDiscounts() {
   };
 }
 
-function calculatePlanTotal(planConfig, interval, productCount) {
-  const count = Math.max(1, Math.min(3, Number(productCount || 1)));
-  const base = interval === 'yearly' ? Number(planConfig.pricePLNYearly || 0) : Number(planConfig.pricePLN || 0);
+function getConfiguredProductPricing() {
+  const plans = ['starter', 'business', 'enterprise'];
+  const products = ['shiftplanner', 'equipment', 'certtrack'];
+  const result = JSON.parse(JSON.stringify(DEFAULT_PRODUCT_PRICING));
+
+  for (const product of products) {
+    for (const planKey of plans) {
+      const monthlyRaw = Number(stmt.getSettingByKey.get(`price_${product}_${planKey}_monthly`)?.value || 0);
+      const yearlyRaw = Number(stmt.getSettingByKey.get(`price_${product}_${planKey}_yearly`)?.value || 0);
+      if (Number.isFinite(monthlyRaw) && monthlyRaw > 0) {
+        result[product][planKey].monthly = Math.round(monthlyRaw);
+      }
+      if (Number.isFinite(yearlyRaw) && yearlyRaw > 0) {
+        result[product][planKey].yearly = Math.round(yearlyRaw);
+      }
+    }
+  }
+
+  return result;
+}
+
+function calculatePlanTotal(planKey, interval, selectedProducts) {
+  const validProducts = ['shiftplanner', 'equipment', 'certtrack'];
+  const uniqueProducts = Array.isArray(selectedProducts)
+    ? Array.from(new Set(selectedProducts.filter(p => validProducts.includes(p))))
+    : [];
+  const products = uniqueProducts.length ? uniqueProducts : ['shiftplanner'];
+  const pricing = getConfiguredProductPricing();
+  const count = products.length;
+  const gross = products.reduce((sum, product) => {
+    const value = interval === 'yearly'
+      ? Number(pricing?.[product]?.[planKey]?.yearly || 0)
+      : Number(pricing?.[product]?.[planKey]?.monthly || 0);
+    return sum + value;
+  }, 0);
   const discounts = getBundleDiscounts();
   const discountPercent = count >= 3 ? discounts.three : count === 2 ? discounts.two : 0;
-  const gross = base * count;
   const net = Math.max(1, Math.round(gross * (1 - discountPercent / 100)));
-  return { count, discountPercent, gross, totalPLN: net };
+  return { count, discountPercent, gross, totalPLN: net, selectedProducts: products, productPricing: pricing };
 }
 
 function getPublicBaseUrl(req) {
@@ -300,7 +349,7 @@ function getTenantAccess(tenant) {
   const blockedByStatus = ['past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired'].includes(tenant.subscription_status);
   const hasAccess = !blockedByStatus && (trialActive || subActive) && !needsCardForTrial;
   const plans = getPlans();
-  const plan = plans[tenant.plan] || plans.starter || { name: 'Trial', maxEmployees: 40, maxUsers: 3, maxProfiles: 1 };
+  const plan = plans[tenant.plan] || plans.starter || { name: 'Trial', maxEmployees: 25, maxUsers: 3, maxProfiles: 1 };
   const daysLeft = trialActive && tenant.subscription_status === 'trialing'
     ? Math.max(0, Math.ceil((new Date(tenant.trial_ends_at + 'T00:00:00').getTime() - Date.now()) / 86400000))
     : null;
@@ -624,7 +673,7 @@ app.post('/api/auth/register', (req, res) => {
   if (!checkRateLimit(ip, 'register', 5, 3600)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za godzinę.' });
 
   const { email, password, name, company_name } = req.body;
-  if (!email || !password || !company_name) return res.status(400).json({ error: 'Wypełnij wszystkie pola' });
+  if (!email || !password) return res.status(400).json({ error: 'Podaj email i hasło' });
   if (password.length < 6) return res.status(400).json({ error: 'Hasło musi mieć min. 6 znaków' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Nieprawidłowy email' });
 
@@ -634,9 +683,13 @@ app.post('/api/auth/register', (req, res) => {
   const hash = bcrypt.hashSync(password, 10);
   const trialEnds = addDaysISO(new Date().toISOString().slice(0, 10), TRIAL_DAYS);
   const verifyToken = crypto.randomBytes(32).toString('hex');
+  const companyFromInput = String(company_name || '').trim();
+  const nameFromInput = String(name || '').trim();
+  const fallbackName = String(email || '').split('@')[0] || 'Użytkownik';
+  const tenantDisplayName = companyFromInput || nameFromInput || fallbackName;
 
   const tenantResult = db.prepare('INSERT INTO tenants (company_name, plan, trial_ends_at, subscription_status) VALUES (?,?,?,?)')
-    .run(company_name.trim(), 'trial', trialEnds, 'trialing');
+    .run(tenantDisplayName, 'trial', trialEnds, 'trialing');
   const tenantId = tenantResult.lastInsertRowid;
 
   const userResult = db.prepare('INSERT INTO users (tenant_id, email, password_hash, name, role, email_verified, verify_token) VALUES (?,?,?,?,?,0,?)')
@@ -749,7 +802,7 @@ app.post('/api/auth/validate', (req, res) => {
       valid: true,
       hasAccess: access.hasAccess,
       user: { id: user.id, email: user.email, name: user.name, role: user.role, tenantId: user.tenant_id, company_name: user.company_name },
-      subscription: { plan: user.plan, status: user.subscription_status, products: (user.products || '').split(','), maxProfiles: access.plan.maxProfiles || 1, maxEmployees: access.plan.maxEmployees || 40 },
+      subscription: { plan: user.plan, status: user.subscription_status, products: (user.products || '').split(','), maxProfiles: access.plan.maxProfiles || 1, maxEmployees: access.plan.maxEmployees || 25 },
       assignedProfiles,
     });
   } catch { res.json({ valid: false }); }
@@ -982,9 +1035,16 @@ app.delete('/api/profiles/:id/users/:userId', auth, (req, res) => {
 app.get('/api/billing/plans', (req, res) => {
   const plans = getPlans();
   const discounts = getBundleDiscounts();
+  const pricing = getConfiguredProductPricing();
   res.json(Object.entries(plans).map(([key, p]) => ({
     key, name: p.name, maxEmployees: p.maxEmployees, maxUsers: p.maxUsers, maxProfiles: p.maxProfiles,
-    pricePLN: p.pricePLN, pricePLNYearly: p.pricePLNYearly,
+    pricePLN: pricing?.shiftplanner?.[key]?.monthly || p.pricePLN,
+    pricePLNYearly: pricing?.shiftplanner?.[key]?.yearly || p.pricePLNYearly,
+    productPrices: {
+      shiftplanner: pricing?.shiftplanner?.[key] || { monthly: p.pricePLN, yearly: p.pricePLNYearly },
+      equipment: pricing?.equipment?.[key] || { monthly: p.pricePLN, yearly: p.pricePLNYearly },
+      certtrack: pricing?.certtrack?.[key] || { monthly: p.pricePLN, yearly: p.pricePLNYearly },
+    },
     bundleDiscountTwo: discounts.two,
     bundleDiscountThree: discounts.three,
   })));
@@ -1000,11 +1060,8 @@ app.post('/api/billing/checkout', authLight, async (req, res) => {
   const planConfig = plans[plan];
   if (!planConfig) return res.status(400).json({ error: 'Nieprawidłowy plan' });
 
-  const selectedProducts = Array.isArray(products)
-    ? Array.from(new Set(products.filter(p => ['shiftplanner', 'equipment', 'certtrack'].includes(p))))
-    : [];
-  const productCount = Math.max(1, selectedProducts.length || 1);
-  const pricing = calculatePlanTotal(planConfig, isYearly ? 'yearly' : 'monthly', productCount);
+  const pricing = calculatePlanTotal(plan, isYearly ? 'yearly' : 'monthly', products);
+  const selectedProducts = pricing.selectedProducts;
 
   const productList = (selectedProducts.length ? selectedProducts : ['shiftplanner']).join(',');
   const tenant = stmt.getTenantById.get(req.tenantId);

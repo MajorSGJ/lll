@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useSEO } from '../hooks/useSEO';
 import { getApiBaseUrl } from '../apiBase';
 
 const API = getApiBaseUrl();
@@ -15,6 +16,11 @@ const PRODUCT_META = [
 ];
 
 export default function BillingPage() {
+  useSEO({
+    title: 'Płatności i subskrypcje | OneHost',
+    description: 'Zarządzaj swoją subskrypcją OneHost. Wybieraj plany i produkty.'
+  });
+
   const { user, subscription, token, refresh } = useAuth();
   const [searchParams] = useSearchParams();
   const [plans, setPlans] = useState([]);
@@ -160,8 +166,11 @@ export default function BillingPage() {
   };
 
   const getPrice = (plan) => {
-    const cycleBase = billingCycle === 'yearly' ? Number(plan.pricePLNYearly || 0) : Number(plan.pricePLN || 0);
-    const gross = cycleBase * selectedProducts.length;
+    const gross = selectedProducts.reduce((sum, pid) => {
+      const fromMatrix = Number(plan?.productPrices?.[pid]?.[billingCycle] || 0);
+      const fallback = billingCycle === 'yearly' ? Number(plan.pricePLNYearly || 0) : Number(plan.pricePLN || 0);
+      return sum + (fromMatrix || fallback);
+    }, 0);
     return Math.round(gross * (1 - discountPercent / 100));
   };
 
@@ -217,7 +226,7 @@ export default function BillingPage() {
             </div>
             <div>
               <p className="text-xs text-slate-400 mb-1">Limit rekordów / aplikację</p>
-              <p className="text-lg font-bold text-slate-800">{sub.planDetails?.maxEmployees || 40}</p>
+              <p className="text-lg font-bold text-slate-800">{sub.planDetails?.maxEmployees || 25}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400 mb-1">Limit przypisań/profil</p>
@@ -309,7 +318,8 @@ export default function BillingPage() {
                   <div className="space-y-1 my-3 pt-2 border-t border-slate-100">
                     {selectedProducts.map((pid) => {
                       const pm = PRODUCT_META.find(p => p.id === pid);
-                      const pp = billingCycle === 'yearly' ? Number(plan.pricePLNYearly || 0) : Number(plan.pricePLN || 0);
+                      const pp = Number(plan?.productPrices?.[pid]?.[billingCycle] || 0)
+                        || (billingCycle === 'yearly' ? Number(plan.pricePLNYearly || 0) : Number(plan.pricePLN || 0));
                       const ppMonth = billingCycle === 'yearly' ? Math.round(pp / 12) : pp;
                       return (
                         <div key={pid} className="flex justify-between text-xs text-slate-400">

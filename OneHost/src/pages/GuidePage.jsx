@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 
 /* ══════════════════════════════════════════════════════════════
    SVG helper functions — reused across illustrations
@@ -1148,6 +1149,12 @@ function AppIllustration({ id, w = 860, h = 480 }) {
    ══════════════════════════════════════════════════════════════ */
 
 export default function GuidePage() {
+  useSEO({
+    title: 'Poradnik i instrukcje | OneHost',
+    description: 'Dowiedz się, jak korzystać z platformy OneHost. Przewodniki po ShiftPlanner, Equipment Manager i CertTrack.',
+    ogUrl: 'https://sklep.onehost.site/guide'
+  });
+
   const [activeTab, setActiveTab] = useState('shiftplanner');
   const guide = GUIDES.find((g) => g.id === activeTab);
 

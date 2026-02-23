@@ -4,6 +4,18 @@ import { getApiBaseUrl } from '../apiBase';
 
 const API = getApiBaseUrl();
 
+const PRICING_PRODUCTS = [
+  { key: 'shiftplanner', label: 'ShiftPlanner' },
+  { key: 'equipment', label: 'Equipment Manager' },
+  { key: 'certtrack', label: 'CertTrack' },
+];
+
+const PRICING_PLANS = [
+  { key: 'starter', label: 'Starter' },
+  { key: 'business', label: 'Business' },
+  { key: 'enterprise', label: 'Enterprise' },
+];
+
 export default function AdminPanel() {
   const [tab, setTab] = useState('tenants');
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('oh_admin_token') || '');
@@ -504,6 +516,47 @@ export default function AdminPanel() {
                     <input type="number" value={settings.bundle_discount || 20} onChange={e => handleSettingChange('bundle_discount', e.target.value)} className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary" />
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-slate-300 mb-3">Ceny produktów (PLN)</h3>
+                <div className="space-y-4">
+                  {PRICING_PRODUCTS.map((product) => (
+                    <div key={product.key} className="bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+                      <div className="text-sm font-semibold text-slate-200 mb-3">{product.label}</div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {PRICING_PLANS.map((plan) => (
+                          <div key={plan.key} className="bg-slate-800/60 border border-slate-700 rounded-lg p-3 space-y-2">
+                            <div className="text-xs font-medium text-slate-300">{plan.label}</div>
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Miesięcznie</label>
+                              <input
+                                type="number"
+                                min={1}
+                                value={settings[`price_${product.key}_${plan.key}_monthly`] || ''}
+                                onChange={e => handleSettingChange(`price_${product.key}_${plan.key}_monthly`, e.target.value)}
+                                placeholder="np. 89"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Rocznie</label>
+                              <input
+                                type="number"
+                                min={1}
+                                value={settings[`price_${product.key}_${plan.key}_yearly`] || ''}
+                                onChange={e => handleSettingChange(`price_${product.key}_${plan.key}_yearly`, e.target.value)}
+                                placeholder="np. 854"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-2">Puste pola = domyślne ceny systemowe OneHost.</p>
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-slate-300 mb-3">SMTP (Email)</h3>

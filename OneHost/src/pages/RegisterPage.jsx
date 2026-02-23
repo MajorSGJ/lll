@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useSEO } from '../hooks/useSEO';
 
 export default function RegisterPage() {
+  useSEO({
+    title: 'Rejestracja - Wypróbuj za darmo | OneHost',
+    description: 'Załóż darmowe konto OneHost i testuj przez 7 dni bez karty. Grafiki pracy, sprzęt i certyfikaty w jednym miejscu.',
+    ogUrl: 'https://sklep.onehost.site/register',
+    robots: 'noindex, nofollow'
+  });
+
   const { register, user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '', password2: '', name: '', company_name: '' });
@@ -46,14 +54,13 @@ export default function RegisterPage() {
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm font-medium">{error}</div>
           )}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Nazwa firmy *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Nazwa konta / firmy (opcjonalnie)</label>
             <input
               type="text"
               value={form.company_name}
               onChange={(e) => handleChange('company_name', e.target.value)}
               className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-              placeholder="np. ACME Sp. z o.o."
-              required
+              placeholder="np. Jan Kowalski lub ACME Sp. z o.o."
               autoFocus
             />
           </div>
@@ -103,7 +110,7 @@ export default function RegisterPage() {
             </div>
           </div>
           <div className="text-xs text-slate-400 leading-relaxed">
-            Rejestrując się akceptujesz <Link to="/terms" className="text-teal-600 underline">regulamin serwisu</Link>. Darmowy 7-dniowy trial dostępny wyłącznie w planie Starter. Subskrypcję możesz uruchomić lub anulować w panelu rozliczeń.
+            Rejestrując się akceptujesz <Link to="/terms" className="text-teal-600 underline">regulamin serwisu</Link>. Darmowy 7-dniowy trial dostępny wyłącznie w planie Starter, bez wymaganej karty płatniczej.
           </div>
           <button
             type="submit"
