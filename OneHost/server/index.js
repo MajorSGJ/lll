@@ -598,7 +598,7 @@ app.get('/api/auth/verify-email', (req, res) => {
   if (!token) return res.status(400).json({ error: 'Brak tokena' });
   const user = stmt.getUserByVerifyToken.get(token);
   if (!user) return res.status(400).json({ error: 'Nieprawidłowy lub wygasły token' });
-  db.prepare('UPDATE users SET email_verified=1, verify_token="" WHERE id=?').run(user.id);
+  db.prepare('UPDATE users SET email_verified=1 WHERE id=?').run(user.id);
   res.json({ ok: true, message: 'Email zweryfikowany pomyślnie!' });
 });
 
