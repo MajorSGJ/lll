@@ -1291,6 +1291,7 @@ app.put('/api/admin/settings', superAuth, (req, res) => {
   const data = req.body;
   for (const [key, value] of Object.entries(data)) {
     if (key === 'stripe_secret_key' && value.includes('•')) continue;
+    if (key === 'smtp_pass' && value.includes('•')) continue;
     stmt.upsertSetting.run(key, String(value));
   }
   res.json({ ok: true });
