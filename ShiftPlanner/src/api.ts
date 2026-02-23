@@ -3,7 +3,13 @@ export type ApiFail = { ok: false; error: string };
 export type ApiResponse<T extends object = object> = ApiOk<T> | ApiFail;
 
 function getApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE || 'http://127.0.0.1:58/api';
+  const configured = (import.meta.env.VITE_API_BASE || '').trim();
+  if (configured) return configured;
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://127.0.0.1:58/api';
+  }
+  return '/api';
 }
 
 function getAuthHeaders(): Record<string, string> {

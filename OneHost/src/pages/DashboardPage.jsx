@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [inviteForm, setInviteForm] = useState({ email: '', name: '', role: 'viewer' });
   const [inviteErr, setInviteErr] = useState('');
   const [inviteOk, setInviteOk] = useState('');
+  const [inviteTempPassword, setInviteTempPassword] = useState('');
   const [announcements, setAnnouncements] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [showNewProfile, setShowNewProfile] = useState(false);
@@ -88,12 +89,13 @@ export default function DashboardPage() {
 
   const handleInvite = async (e) => {
     e.preventDefault();
-    setInviteErr(''); setInviteOk('');
+    setInviteErr(''); setInviteOk(''); setInviteTempPassword('');
     try {
       const r = await fetch(`${API}/users`, { method: 'POST', headers, body: JSON.stringify(inviteForm) });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error);
       setInviteOk('Użytkownik dodany!');
+      setInviteTempPassword(data.tempPassword || '');
       setInviteForm({ email: '', name: '', role: 'viewer' });
       const ur = await fetch(`${API}/users`, { headers });
       setUsers(await ur.json());
@@ -105,6 +107,20 @@ export default function DashboardPage() {
     if (!confirm('Usunąć tego użytkownika?')) return;
     await fetch(`${API}/users/${id}`, { method: 'DELETE', headers });
     setUsers(users.filter(u => u.id !== id));
+  };
+
+  const handleResetUserPassword = async (id) => {
+    setInviteErr('');
+    try {
+      const r = await fetch(`${API}/users/${id}/reset-password`, { method: 'POST', headers });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Nie udało się zresetować hasła');
+      setInviteOk('Hasło użytkownika zostało zresetowane.');
+      setInviteTempPassword(data.tempPassword || '');
+      if (!showInvite) setShowInvite(true);
+    } catch (err) {
+      setInviteErr(err.message || 'Błąd resetu hasła');
+    }
   };
 
   const handleCreateProfile = async (e) => {
@@ -419,6 +435,11 @@ export default function DashboardPage() {
             <form onSubmit={handleInvite} className="bg-slate-50 rounded-xl p-4 mb-6 space-y-3">
               {inviteErr && <div className="text-sm text-red-600 font-medium">{inviteErr}</div>}
               {inviteOk && <div className="text-sm text-green-600 font-medium">{inviteOk}</div>}
+              {inviteTempPassword && (
+                <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  Hasło tymczasowe nowego użytkownika: <strong>{inviteTempPassword}</strong>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <input
                   type="email"
@@ -465,6 +486,9 @@ export default function DashboardPage() {
                     u.role === 'manager' ? 'bg-blue-100 text-blue-700' :
                     'bg-slate-100 text-slate-600'
                   }`}>{u.role}</span>
+                  {u.id !== user?.id && user?.role === 'admin' && (
+                    <button onClick={() => handleResetUserPassword(u.id)} className="text-amber-600 hover:text-amber-700 cursor-pointer text-sm">Reset hasła</button>
+                  )}
                   {u.id !== user?.id && user?.role === 'admin' && (
                     <button onClick={() => handleDeleteUser(u.id)} className="text-red-400 hover:text-red-600 cursor-pointer text-sm">Usuń</button>
                   )}

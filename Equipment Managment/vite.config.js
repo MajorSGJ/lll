@@ -30,4 +30,10 @@ export default defineConfig({
     port: 59,
     strictPort: true,
   },
+  preview: {
+    host: '127.0.0.1',
+    port: 59,
+    strictPort: true,
+    allowedHosts: ['em.onehost.site', 'localhost', '127.0.0.1'],
+  },
 });

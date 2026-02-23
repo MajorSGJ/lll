@@ -9,6 +9,12 @@ export default defineConfig({
     port: 55,
     strictPort: true,
   },
+  preview: {
+    host: '127.0.0.1',
+    port: 55,
+    strictPort: true,
+    allowedHosts: ['sklep.onehost.site', 'localhost', '127.0.0.1'],
+  },
   build: {
     outDir: 'dist',
     target: 'esnext',

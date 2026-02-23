@@ -23,4 +23,10 @@ export default defineConfig({
     port: 57,
     strictPort: true,
   },
+  preview: {
+    host: '127.0.0.1',
+    port: 57,
+    strictPort: true,
+    allowedHosts: ['shiftplanner.onehost.site', 'localhost', '127.0.0.1'],
+  },
 })

@@ -143,12 +143,15 @@ db.exec(`
 // ── Seed / enforce super admin ──────────────────────────
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
 const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH || '').trim();
-const ADMIN_AUTH_READY = !!(ADMIN_EMAIL && ADMIN_PASSWORD_HASH);
-if (!ADMIN_AUTH_READY) {
-  console.warn('[OneHost] UWAGA: Brak ADMIN_EMAIL lub ADMIN_PASSWORD_HASH w env. Logowanie super-admina jest wyłączone do czasu konfiguracji.');
-} else {
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || '').trim();
+const ADMIN_EFFECTIVE_PASSWORD_HASH = ADMIN_PASSWORD_HASH || (ADMIN_PASSWORD ? bcrypt.hashSync(ADMIN_PASSWORD, 10) : '');
+let ADMIN_AUTH_READY = false;
+if (ADMIN_EMAIL && ADMIN_EFFECTIVE_PASSWORD_HASH) {
   const existing = db.prepare('SELECT * FROM super_admins WHERE LOWER(email)=?').get(ADMIN_EMAIL);
-  const hash = ADMIN_PASSWORD_HASH;
+  const hash = ADMIN_EFFECTIVE_PASSWORD_HASH;
+  if (!ADMIN_PASSWORD_HASH && ADMIN_PASSWORD) {
+    console.warn('[OneHost] Użyto ADMIN_PASSWORD (plain) do wygenerowania hasha admina podczas startu. Dla produkcji zalecane jest użycie ADMIN_PASSWORD_HASH.');
+  }
   if (!existing) {
     db.prepare('DELETE FROM super_admins').run();
     db.prepare('INSERT INTO super_admins (email, password_hash, name) VALUES (?,?,?)').run(ADMIN_EMAIL, hash, 'Super Admin');
@@ -156,6 +159,23 @@ if (!ADMIN_AUTH_READY) {
   } else {
     db.prepare('UPDATE super_admins SET password_hash=?, email=? WHERE id=?').run(hash, ADMIN_EMAIL, existing.id);
     db.prepare('DELETE FROM super_admins WHERE id!=?').run(existing.id);
+  }
+  ADMIN_AUTH_READY = true;
+} else {
+  const persistedAdmin = db.prepare('SELECT id, email FROM super_admins LIMIT 1').get();
+  if (persistedAdmin) {
+    ADMIN_AUTH_READY = true;
+    console.warn(`[OneHost] Brak ADMIN_* w env. Używany zapisany super admin z bazy: ${persistedAdmin.email}`);
+  } else {
+    const bootstrapEmail = (process.env.ADMIN_BOOTSTRAP_EMAIL || 'admin@onehost.local').toLowerCase().trim();
+    const bootstrapPassword = (process.env.ADMIN_BOOTSTRAP_PASSWORD || crypto.randomBytes(12).toString('base64url')).trim();
+    const bootstrapHash = bcrypt.hashSync(bootstrapPassword, 10);
+    db.prepare('DELETE FROM super_admins').run();
+    db.prepare('INSERT INTO super_admins (email, password_hash, name) VALUES (?,?,?)').run(bootstrapEmail, bootstrapHash, 'Super Admin');
+    ADMIN_AUTH_READY = true;
+    console.warn(`[OneHost] AUTO-BOOTSTRAP admin utworzony: ${bootstrapEmail}`);
+    console.warn(`[OneHost] AUTO-BOOTSTRAP hasło jednorazowe: ${bootstrapPassword}`);
+    console.warn('[OneHost] Ustaw ADMIN_EMAIL + ADMIN_PASSWORD_HASH (lub ADMIN_PASSWORD) w env i zrestartuj usługę.');
   }
 }
 
@@ -691,6 +711,21 @@ app.delete('/api/users/:id', auth, (req, res) => {
   if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ error: 'Nie możesz usunąć siebie' });
   db.prepare('DELETE FROM users WHERE id=? AND tenant_id=?').run(req.params.id, req.tenantId);
   res.json({ ok: true });
+});
+
+app.post('/api/users/:id/reset-password', auth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Tylko admin może resetować hasła' });
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId)) return res.status(400).json({ error: 'Nieprawidłowe ID użytkownika' });
+
+  const target = db.prepare('SELECT id, tenant_id, email FROM users WHERE id=? AND tenant_id=?').get(userId, req.tenantId);
+  if (!target) return res.status(404).json({ error: 'Użytkownik nie istnieje' });
+
+  const tempPassword = crypto.randomBytes(6).toString('hex');
+  const hash = bcrypt.hashSync(tempPassword, 10);
+  db.prepare('UPDATE users SET password_hash=? WHERE id=? AND tenant_id=?').run(hash, userId, req.tenantId);
+
+  res.json({ ok: true, userId, email: target.email, tempPassword });
 });
 
 // ── Announcements (user-facing) ─────────────────────────

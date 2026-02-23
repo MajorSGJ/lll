@@ -29,4 +29,10 @@ export default defineConfig({
       '/api': 'http://127.0.0.1:62',
     },
   },
+  preview: {
+    host: '127.0.0.1',
+    port: 61,
+    strictPort: true,
+    allowedHosts: ['certtrack.onehost.site', 'localhost', '127.0.0.1'],
+  },
 })
