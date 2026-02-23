@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { getApiBaseUrl } from '../apiBase';
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:56/api';
+const API = getApiBaseUrl();
 
 export default function VerifyPage() {
   const [params] = useSearchParams();

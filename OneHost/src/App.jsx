@@ -1,7 +1,8 @@
 import React, { useState, useEffect, createContext, useContext, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { getApiBaseUrl } from './apiBase';
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:56/api';
+const API = getApiBaseUrl();
 
 // ── Auth Context ────────────────────────────────────────
 const AuthCtx = createContext(null);

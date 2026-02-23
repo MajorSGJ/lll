@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../App';
+import { getApiBaseUrl } from '../apiBase';
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:56/api';
+const API = getApiBaseUrl();
 
 const BUNDLE_DISCOUNT_DEFAULT_2 = 10;
 const BUNDLE_DISCOUNT_DEFAULT_3 = 20;

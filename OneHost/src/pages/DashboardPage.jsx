@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { getApiBaseUrl } from '../apiBase';
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:56/api';
+const API = getApiBaseUrl();
 
 const APP_URLS = {
   shiftplanner: import.meta.env.VITE_SHIFTPLANNER_URL || 'https://shiftplanner.onehost.site',
