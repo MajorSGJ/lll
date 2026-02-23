@@ -25,6 +25,7 @@ const TRIAL_DAYS = 7;
 const BUNDLE_DISCOUNT = 20; // %
 const REQUIRE_CARD_FOR_TRIAL = process.env.REQUIRE_CARD_FOR_TRIAL === '1';
 const ONEHOST_PUBLIC_URL = process.env.ONEHOST_PUBLIC_URL || 'https://sklep.onehost.site';
+const ONEHOST_VERIFY_BASE_URL = process.env.ONEHOST_VERIFY_BASE_URL || '';
 
 let stripe = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
@@ -261,6 +262,24 @@ function calculatePlanTotal(planConfig, interval, productCount) {
   const gross = base * count;
   const net = Math.max(1, Math.round(gross * (1 - discountPercent / 100)));
   return { count, discountPercent, gross, totalPLN: net };
+}
+
+function getPublicBaseUrl(req) {
+  const forcedBase = (ONEHOST_VERIFY_BASE_URL || ONEHOST_PUBLIC_URL || '').trim();
+  if (forcedBase) return forcedBase.replace(/\/+$/, '');
+
+  const forwardedProto = (req.headers['x-forwarded-proto'] || '').toString().split(',')[0].trim();
+  const forwardedHost = (req.headers['x-forwarded-host'] || '').toString().split(',')[0].trim();
+  const host = forwardedHost || (req.headers.host || '').toString().trim();
+  const proto = forwardedProto || (req.secure ? 'https' : 'http');
+
+  if (host) return `${proto}://${host}`;
+  return 'https://sklep.onehost.site';
+}
+
+function buildVerifyUrl(req, verifyToken) {
+  const base = getPublicBaseUrl(req);
+  return `${base}/verify?token=${encodeURIComponent(String(verifyToken || ''))}`;
 }
 
 function addDaysISO(iso, days) {
@@ -549,7 +568,7 @@ function superAuth(req, res, next) {
 }
 
 // ── Auth routes ─────────────────────────────────────────
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', (req, res) => {
   const ip = req.ip || 'unknown';
   if (!checkRateLimit(ip, 'register', 5, 3600)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj za godzinę.' });
 
@@ -573,13 +592,13 @@ app.post('/api/auth/register', async (req, res) => {
     .run(tenantId, email.toLowerCase().trim(), hash, name || '', 'admin', verifyToken);
 
   // Send verification email
-  const verifyUrl = `${req.headers.origin || ONEHOST_PUBLIC_URL}/verify?token=${verifyToken}`;
-  const mailResult = await sendMailDetailed(email.toLowerCase().trim(), 'Potwierdź adres email — OneHost',
+  const verifyUrl = buildVerifyUrl(req, verifyToken);
+  sendMail(email.toLowerCase().trim(), 'Potwierdź adres email — OneHost',
     emailTemplate('Potwierdź swój email', `<p>Cześć${name ? ` ${name}` : ''}!</p>
     <p>Dziękujemy za rejestrację w OneHost. Kliknij poniższy przycisk, aby potwierdzić swój adres email:</p>
     <a class="btn" href="${verifyUrl}">Potwierdź email</a>
     <p style="font-size:12px;color:#94a3b8;margin-top:16px">Jeśli nie zakładałeś konta w OneHost, zignoruj tę wiadomość.</p>`)
-  );
+  ).catch(() => {});
 
   const token = jwt.sign({ userId: userResult.lastInsertRowid, tenantId }, JWT_SECRET, { expiresIn: '30d' });
   const user = stmt.getUserById.get(userResult.lastInsertRowid);
@@ -588,10 +607,7 @@ app.post('/api/auth/register', async (req, res) => {
     token,
     user: { id: user.id, email: user.email, name: user.name, role: user.role, company_name: user.company_name, emailVerified: false },
     subscription: { ...getTenantAccess(user), plan: 'trial', status: 'trialing', trialEndsAt: trialEnds },
-    message: mailResult.ok
-      ? 'Konto utworzone! Sprawdź email w celu weryfikacji.'
-      : `Konto utworzone, ale nie udało się wysłać emaila weryfikacyjnego (${mailResult.error}).`,
-    verificationEmailSent: !!mailResult.ok,
+    message: 'Konto utworzone! Sprawdź email w celu weryfikacji.',
   });
 });
 
@@ -605,20 +621,17 @@ app.get('/api/auth/verify-email', (req, res) => {
   res.json({ ok: true, message: 'Email zweryfikowany pomyślnie!' });
 });
 
-app.post('/api/auth/resend-verification', authLight, async (req, res) => {
+app.post('/api/auth/resend-verification', authLight, (req, res) => {
   const ip = req.ip || 'unknown';
   if (!checkRateLimit(ip, 'resend_verify', 3, 3600)) return res.status(429).json({ error: 'Zbyt wiele prób. Spróbuj ponownie za godzinę.' });
   if (req.user.email_verified) return res.json({ ok: true, message: 'Email jest już zweryfikowany.' });
   const verifyToken = crypto.randomBytes(32).toString('hex');
   db.prepare('UPDATE users SET verify_token=? WHERE id=?').run(verifyToken, req.user.id);
-  const verifyUrl = `${req.headers.origin || ONEHOST_PUBLIC_URL}/verify?token=${verifyToken}`;
-  const mailResult = await sendMailDetailed(req.user.email, 'Potwierdź adres email — OneHost',
+  const verifyUrl = buildVerifyUrl(req, verifyToken);
+  sendMail(req.user.email, 'Potwierdź adres email — OneHost',
     emailTemplate('Potwierdź swój email', `<p>Kliknij poniższy przycisk, aby potwierdzić swój adres email:</p>
     <a class="btn" href="${verifyUrl}">Potwierdź email</a>`)
-  );
-  if (!mailResult.ok) {
-    return res.status(500).json({ error: `Nie udało się wysłać emaila: ${mailResult.error}` });
-  }
+  ).catch(() => {});
   res.json({ ok: true, message: 'Email weryfikacyjny wysłany ponownie.' });
 });
 
@@ -1291,7 +1304,6 @@ app.put('/api/admin/settings', superAuth, (req, res) => {
   const data = req.body;
   for (const [key, value] of Object.entries(data)) {
     if (key === 'stripe_secret_key' && value.includes('•')) continue;
-    if (key === 'smtp_pass' && value.includes('•')) continue;
     stmt.upsertSetting.run(key, String(value));
   }
   res.json({ ok: true });
