@@ -84,8 +84,13 @@ export default function DashboardPage() {
   };
 
   const resendVerification = async () => {
-    await fetch(`${API}/auth/resend-verification`, { method: 'POST', headers });
-    alert('Email weryfikacyjny wysłany!');
+    const r = await fetch(`${API}/auth/resend-verification`, { method: 'POST', headers });
+    const data = await r.json();
+    if (!r.ok) {
+      alert(data?.error || 'Nie udało się wysłać emaila weryfikacyjnego.');
+      return;
+    }
+    alert(data?.message || 'Email weryfikacyjny wysłany!');
   };
 
   const handleInvite = async (e) => {
