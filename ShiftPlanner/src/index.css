@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.35; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+
+a { color: inherit; }
+:focus { outline: none; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--focus-border) 70%, transparent); outline-offset: 2px; }
+button, input, select, textarea { font: inherit; }
+
+/* ===== DARK THEME (Black) ===== */
+:root,
+body[data-theme="dark"] {
+  --bg: #09090b;
+  --surface: rgba(255,255,255,.04);
+  --surface2: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.12);
+  --muted: rgba(161,161,170,.9);
+  --text: #fafafa;
+  --shadow: 0 8px 32px rgba(0,0,0,.5);
+  --primary: #14b8a6;
+  --primary2: #0d9488;
+  --good: #22c55e;
+  --warn: #eab308;
+  --bad: #f43f5e;
+
+  --sidebar-bg: rgba(255,255,255,.02);
+  --brand-mark-shadow: 0 8px 24px rgba(20,184,166,.3);
+  --nav-active-bg: linear-gradient(135deg, rgba(20,184,166,.18), rgba(13,148,136,.14));
+  --nav-active-border: rgba(20,184,166,.35);
+  --pill-bg: rgba(255,255,255,.05);
+  --btn-bg: rgba(255,255,255,.05);
+  --btn-hover-bg: rgba(255,255,255,.08);
+  --btn-primary-shadow: 0 6px 24px rgba(20,184,166,.35);
+  --btn-primary-color: #fff;
+  --input-bg: rgba(0,0,0,.4);
+  --focus-border: rgba(20,184,166,.85);
+  --focus-shadow: 0 0 0 3px rgba(20,184,166,.3);
+  --table-th-bg: rgba(255,255,255,.03);
+  --table-row-hover: rgba(255,255,255,.04);
+  --check-bg: rgba(0,0,0,.4);
+  --check-border: rgba(255,255,255,.15);
+  --check-ring: rgba(20,184,166,.2);
+  --badge-good-color: #bbf7d0;
+  --badge-good-border: rgba(34,197,94,.4);
+  --badge-good-bg: rgba(34,197,94,.1);
+  --badge-bad-color: #fecdd3;
+  --badge-bad-border: rgba(244,63,94,.4);
+  --badge-bad-bg: rgba(244,63,94,.1);
+  --badge-warn-color: #fef08a;
+  --badge-warn-border: rgba(234,179,8,.4);
+  --badge-warn-bg: rgba(234,179,8,.1);
+  --day-bg: rgba(255,255,255,.03);
+  --day-hover-bg: rgba(255,255,255,.06);
+  --day-hover-border: rgba(20,184,166,.4);
+  --day-today-border: rgba(34,197,94,.55);
+  --day-weekday-bg: rgba(255,255,255,.02);
+  --day-weekend-bg: rgba(234,179,8,.06);
+  --day-weekend-border: rgba(234,179,8,.35);
+  --day-sunday-bg: rgba(244,63,94,.08);
+  --day-sunday-border: rgba(244,63,94,.4);
+  --day-selected-border: rgba(20,184,166,.6);
+  --day-selected-shadow: 0 10px 32px rgba(20,184,166,.14);
+  --day-selected-bg: linear-gradient(135deg, rgba(20,184,166,.12), rgba(13,148,136,.08));
+  --chip-bg: rgba(255,255,255,.04);
+  --chip-warn-border: rgba(234,179,8,.4);
+  --chip-warn-bg: rgba(234,179,8,.08);
+  --chip-warn-color: #fef08a;
+  --modal-backdrop: rgba(0,0,0,.65);
+  --modal-bg: #18181b;
+  --modal-shadow: 0 24px 64px rgba(0,0,0,.6);
+  --toast-bg: rgba(255,255,255,.04);
+  --toast-error-border: rgba(244,63,94,.5);
+  --toast-error-bg: rgba(244,63,94,.1);
+  --code-bg: rgba(255,255,255,.05);
+  --select-opt-this-shift-bg: rgba(244,63,94,.25);
+  --select-opt-this-shift-color: #fecdd3;
+  --select-opt-other-shift-bg: rgba(234,179,8,.2);
+  --select-opt-other-shift-color: #fef08a;
+  --select-option-checked-bg: #0d9488;
+  --select-option-checked-color: #f0fdfa;
+  --text1: #fafafa;
+  --text2: rgba(161,161,170,.7);
+  --bg2: rgba(255,255,255,.06);
+  --warn-bg: rgba(234,179,8,.12);
+}
+
+/* ===== LIGHT THEME (White) ===== */
+body[data-theme="light"] {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --border: #dee2e6;
+  --muted: #495057;
+  --text: #212529;
+  --shadow: 0 2px 12px rgba(0,0,0,.06);
+  --primary: #0d9488;
+  --primary2: #0f766e;
+  --good: #16a34a;
+  --warn: #d97706;
+  --bad: #e11d48;
+
+  --sidebar-bg: rgba(255,255,255,.85);
+  --brand-mark-shadow: 0 6px 18px rgba(13,148,136,.2);
+  --nav-active-bg: linear-gradient(135deg, rgba(13,148,136,.1), rgba(15,118,110,.08));
+  --nav-active-border: rgba(13,148,136,.35);
+  --pill-bg: #e9ecef;
+  --btn-bg: #ffffff;
+  --btn-hover-bg: #f1f3f5;
+  --btn-primary-shadow: 0 4px 14px rgba(13,148,136,.3);
+  --btn-primary-color: #ffffff;
+  --input-bg: #ffffff;
+  --focus-border: rgba(13,148,136,.75);
+  --focus-shadow: 0 0 0 3px rgba(13,148,136,.15);
+  --table-th-bg: #f1f3f5;
+  --table-row-hover: #f8f9fa;
+  --check-bg: #ffffff;
+  --check-border: #ced4da;
+  --check-ring: rgba(13,148,136,.15);
+  --badge-good-color: #14532d;
+  --badge-good-border: rgba(22,163,74,.4);
+  --badge-good-bg: rgba(22,163,74,.1);
+  --badge-bad-color: #881337;
+  --badge-bad-border: rgba(225,29,72,.35);
+  --badge-bad-bg: rgba(225,29,72,.08);
+  --badge-warn-color: #78350f;
+  --badge-warn-border: rgba(217,119,6,.4);
+  --badge-warn-bg: rgba(217,119,6,.1);
+  --day-bg: #ffffff;
+  --day-hover-bg: #f1f3f5;
+  --day-hover-border: rgba(13,148,136,.45);
+  --day-today-border: rgba(22,163,74,.55);
+  --day-weekday-bg: #ffffff;
+  --day-weekend-bg: #fffbeb;
+  --day-weekend-border: rgba(217,119,6,.35);
+  --day-sunday-bg: #fff1f2;
+  --day-sunday-border: rgba(225,29,72,.35);
+  --day-selected-border: rgba(13,148,136,.55);
+  --day-selected-shadow: 0 6px 20px rgba(13,148,136,.15);
+  --day-selected-bg: linear-gradient(135deg, rgba(13,148,136,.08), rgba(15,118,110,.05));
+  --chip-bg: #f1f3f5;
+  --chip-warn-border: rgba(217,119,6,.35);
+  --chip-warn-bg: rgba(217,119,6,.08);
+  --chip-warn-color: #78350f;
+  --modal-backdrop: rgba(0,0,0,.3);
+  --modal-bg: #ffffff;
+  --modal-shadow: 0 20px 50px rgba(0,0,0,.12);
+  --toast-bg: #ffffff;
+  --toast-error-border: rgba(225,29,72,.35);
+  --toast-error-bg: rgba(225,29,72,.06);
+  --code-bg: #e9ecef;
+  --select-opt-this-shift-bg: rgba(225,29,72,.1);
+  --select-opt-this-shift-color: #881337;
+  --select-opt-other-shift-bg: rgba(217,119,6,.1);
+  --select-opt-other-shift-color: #78350f;
+  --select-option-checked-bg: #0d9488;
+  --select-option-checked-color: #ffffff;
+  --text1: #212529;
+  --text2: #6c757d;
+  --bg2: #f1f3f5;
+  --warn-bg: #fff8e1;
+}
+
+body { background: var(--bg); color: var(--text); }
+
+.disabled-day {
+  opacity: 0.4;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(148,163,184,.12) 4px,
+    rgba(148,163,184,.12) 8px
+  ) !important;
+}
+.disabled-day::after {
+  content: '🚫';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 10px;
+  opacity: 0.5;
+}
