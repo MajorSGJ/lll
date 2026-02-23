@@ -409,20 +409,70 @@ function purgeTenantExternalData(tenantId) {
 let _cachedTransporter = null;
 let _cachedSmtpSignature = '';
 
-function getMailTransporter() {
-  const host = stmt.getSettingByKey.get('smtp_host')?.value;
-  const portRaw = stmt.getSettingByKey.get('smtp_port')?.value || '587';
-  const port = parseInt(portRaw) || 587;
-  const user = stmt.getSettingByKey.get('smtp_user')?.value;
-  const pass = stmt.getSettingByKey.get('smtp_pass')?.value;
-  if (!host || !user || !pass) return null;
+function getSettingTrimmed(...keys) {
+  for (const key of keys) {
+    const value = String(stmt.getSettingByKey.get(key)?.value || '').trim();
+    if (value) return value;
+  }
+  return '';
+}
 
-  const secureSetting = String(stmt.getSettingByKey.get('smtp_secure')?.value || '').toLowerCase();
+function isMaskedSecret(value) {
+  const v = String(value || '').trim();
+  if (!v) return false;
+  return /^([*•])+$/u.test(v);
+}
+
+function resolveSmtpConfig() {
+  const dbHost = getSettingTrimmed('smtp_host', 'smtp_server');
+  const dbPort = getSettingTrimmed('smtp_port');
+  const dbUser = getSettingTrimmed('smtp_user', 'smtp_username', 'smtp_login');
+  const dbPassRaw = getSettingTrimmed('smtp_pass', 'smtp_password');
+  const dbFrom = getSettingTrimmed('smtp_from', 'mail_from');
+
+  const envHost = String(process.env.SMTP_HOST || '').trim();
+  const envPort = String(process.env.SMTP_PORT || '').trim();
+  const envUser = String(process.env.SMTP_USER || '').trim();
+  const envPass = String(process.env.SMTP_PASS || '').trim();
+  const envFrom = String(process.env.SMTP_FROM || '').trim();
+
+  const host = dbHost || envHost;
+  const portRaw = dbPort || envPort || '587';
+  const port = parseInt(String(portRaw).trim(), 10) || 587;
+  const user = dbUser || envUser;
+  const pass = isMaskedSecret(dbPassRaw) ? envPass : (dbPassRaw || envPass);
+
+  const secureSetting = String(getSettingTrimmed('smtp_secure') || process.env.SMTP_SECURE || '').toLowerCase();
   const secure = secureSetting ? ['1', 'true', 'yes'].includes(secureSetting) : port === 465;
+  const from = dbFrom || envFrom || user || 'noreply@onehost.site';
+
+  if (!host) {
+    return { ok: false, error: 'Brak smtp_host (host SMTP).' };
+  }
+  if (!user) {
+    return { ok: false, error: 'Brak smtp_user (login SMTP).' };
+  }
+  if (!pass) {
+    if (isMaskedSecret(dbPassRaw)) {
+      return { ok: false, error: 'smtp_pass jest zamaskowane. Wpisz hasło SMTP ponownie w panelu i zapisz.' };
+    }
+    return { ok: false, error: 'Brak smtp_pass (hasło SMTP).' };
+  }
+
+  return { ok: true, host, port, user, pass, secure, from };
+}
+
+function getMailTransporter() {
+  const config = resolveSmtpConfig();
+  if (!config.ok) return { transporter: null, error: config.error };
+
+  const { host, port, user, pass, secure } = config;
 
   // Cache transport — recreate only when config changes
   const sig = `${host}:${port}:${user}:${pass}:${secure}`;
-  if (_cachedTransporter && _cachedSmtpSignature === sig) return _cachedTransporter;
+  if (_cachedTransporter && _cachedSmtpSignature === sig) {
+    return { transporter: _cachedTransporter, error: '' };
+  }
 
   _cachedTransporter = nodemailer.createTransport({
     host,
@@ -440,17 +490,18 @@ function getMailTransporter() {
   });
   _cachedSmtpSignature = sig;
   console.log(`[Mail] SMTP transport created: ${host}:${port} secure=${secure} requireTLS=${!secure && port !== 25}`);
-  return _cachedTransporter;
+  return { transporter: _cachedTransporter, error: '' };
 }
 
 async function sendMailDetailed(to, subject, html) {
-  const transporter = getMailTransporter();
+  const { transporter, error: smtpError } = getMailTransporter();
   if (!transporter) {
-    console.warn('[Mail] SMTP not configured — set smtp_host, smtp_user, smtp_pass in Admin > Ustawienia');
-    return { ok: false, error: 'SMTP nie skonfigurowany. Ustaw dane SMTP w panelu admina (Ustawienia > SMTP).' };
+    console.warn(`[Mail] SMTP not configured: ${smtpError}`);
+    return { ok: false, error: `SMTP nie skonfigurowany: ${smtpError}` };
   }
 
-  const from = stmt.getSettingByKey.get('smtp_from')?.value || stmt.getSettingByKey.get('smtp_user')?.value || 'noreply@onehost.site';
+  const smtp = resolveSmtpConfig();
+  const from = smtp.ok ? smtp.from : 'noreply@onehost.site';
   try {
     const info = await transporter.sendMail({ from, to, subject, html });
     console.log(`[Mail] Sent "${subject}" to ${to} (messageId: ${info.messageId || '-'})`);
@@ -1321,7 +1372,8 @@ app.get('/api/admin/stats', superAuth, (req, res) => {
 
 // ── Admin test email ────────────────────────────────────
 app.post('/api/admin/test-email', superAuth, async (req, res) => {
-  const from = stmt.getSettingByKey.get('smtp_from')?.value || stmt.getSettingByKey.get('smtp_user')?.value;
+  const smtp = resolveSmtpConfig();
+  const from = smtp.ok ? smtp.from : '';
   if (!from) return res.status(400).json({ error: 'Brak konfiguracji adresu nadawcy (SMTP From / User)' });
 
   const to = from.includes('<') ? from.match(/<(.+)>/)?.[1] || from : from;
