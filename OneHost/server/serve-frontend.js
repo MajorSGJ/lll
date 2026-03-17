@@ -47,9 +47,13 @@ function isBot(ua = '') {
 const app = express();
 
 // ── Bot → pre-rendered HTML ─────────────────────────────────────────────────
+const STATIC_PASSTHROUGH = /\.(xml|txt|json|ico|png|jpg|jpeg|webp|svg|css|js|woff2?|ttf|eot|map)$/i;
+
 app.use((req, res, next) => {
   const ua = req.headers['user-agent'] || '';
   if (!isBot(ua)) return next();
+  // Static assets (sitemap.xml, robots.txt, images, etc.) must be served directly
+  if (STATIC_PASSTHROUGH.test(req.path)) return next();
 
   const html = PRERENDERED[req.path] ?? PRERENDERED['/'];
   if (html) {
