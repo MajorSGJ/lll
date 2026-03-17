@@ -222,8 +222,8 @@ export default function LandingPage() {
         <section id="produkty" className="py-24 bg-white" aria-labelledby="products-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 id="products-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Trzy narzędzia, jedna platforma</h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Każde narzędzie rozwiązuje konkretny problem w Twojej firmie. Razem tworzą kompletne rozwiązanie do zarządzania.</p>
+              <h2 id="products-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Trzy narzędzia do zarządzania firmą w jednej platformie</h2>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Każde narzędzie rozwiązuje konkretny problem w Twojej firmie. Razem tworzą kompletne rozwiązanie: planowanie grafiku pracy, kontrola przeglądów sprzętu i ewidencja certyfikatów pracowników.</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {PRODUCTS.map((product) => (
@@ -234,7 +234,7 @@ export default function LandingPage() {
                     {product.icon}
                   </div>
                   <h3 className="text-xl font-bold text-slate-800 mb-3" itemProp="name">{product.name}</h3>
-                  <p className="text-slate-500 mb-2" itemProp="description">{product.description}</p>
+                  <p className="text-slate-600 mb-2 font-medium" itemProp="description">{product.description}</p>
                   <p className="text-sm text-slate-400 mb-6">{product.longDesc}</p>
                   <ul className="space-y-3">
                     {product.features.map((f, i) => (
@@ -254,8 +254,8 @@ export default function LandingPage() {
         <section id="funkcje" className="py-24 bg-slate-50" aria-labelledby="features-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Dlaczego OneHost?</h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Narzędzia stworzone z myślą o użytkownikach indywidualnych i polskich firmach.</p>
+              <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Dlaczego OneHost? Kluczowe funkcje platformy</h2>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">Narzędzia stworzone z myślą o polskich firmach — w 100% po polsku, z izolacją danych i szybkim wdrożeniem.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
@@ -283,7 +283,7 @@ export default function LandingPage() {
         <section id="cennik" className="py-24 bg-white" aria-labelledby="pricing-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Prosty, przejrzysty cennik</h2>
+              <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Cennik OneHost — przejrzyste plany dla firm</h2>
               <p className="text-lg text-slate-500 mb-2">Każdy produkt ma indywidualną cenę. Możesz kupić 1, 2 lub 3 produkty — pakiet 3 daje rabat {BUNDLE_DISCOUNT}%.</p>
               <p className="text-sm text-slate-400 mb-8">Free trial (7 dni) dostępny tylko w planie Starter. Bez wymaganej karty.</p>
 
@@ -418,7 +418,7 @@ export default function LandingPage() {
         <section id="faq" className="py-24 bg-slate-50" aria-labelledby="faq-heading">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 id="faq-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Często zadawane pytania</h2>
+              <h2 id="faq-heading" className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">Często zadawane pytania (FAQ)</h2>
               <p className="text-lg text-slate-500">Nie znalazłeś odpowiedzi? Napisz na <a href="mailto:Admin@onehost.site" className="text-teal-600 underline">Admin@onehost.site</a></p>
             </div>
             <div className="space-y-3">
